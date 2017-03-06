@@ -1,0 +1,20 @@
+body {
+    background-color: #222;
+    font-size: 11px;
+    font-family: Verdana, sans-serif;
+    color: lightgray;
+}
+
+#images {
+    margin: 20px auto;
+    text-align: center;
+}
+
+#images a {
+    color: lightgray;
+    display: block;
+}
+
+#images a:hover {
+    color: white;
+}
