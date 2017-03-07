@@ -1,4 +1,6 @@
 <?php
+
+// Path for storing the images, must exist
 $folderPath = "img/";
 
 if (!empty($_FILES)) {
