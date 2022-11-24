@@ -9,7 +9,7 @@ HQ Image Service
 
 There may be some other extensions needed as well, but didn't remember to check.
 
-Before deploying the site, remember to edit the `mysql.php` to match your mysql host configuration, remove unnecesary stuff (`.htaccess` files if not using Apache) and maybe this README as well. Yes, this doesn't have any fancy deploy script so that has to be done by hand.
+Before deploying the site, remember to edit the `mysql.php` to match your mysql host configuration, remove unnecesary stuff (`.htaccess` files if not using Apache) and maybe this README as well. Yes, this doesn't have any fancy deploy script so that has to be done by hand. Also update the `https://i.miemala.com` hosts to match your own in the `index.html` file.
 
 ## Schema
 
