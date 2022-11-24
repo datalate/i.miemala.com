@@ -9,7 +9,8 @@
     <body>
 <?php
 
-$db = new mysqli("localhost", "www", "www", "www");
+require_once("../mysql.php");
+$db = new mysqli($MYSQL_HOST, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DB);
 if ($db->connect_errno > 0) {
     echo "Unable to connect to database: ".$db->connect_error;
 }
@@ -18,7 +19,7 @@ else {
         echo "Failed to load character set: ".$db->error;
     }
     else {
-        $sql = "SELECT `code`,`fname` FROM `sharex` ORDER BY `id` DESC";
+        $sql = "SELECT `code`,`fname` FROM `data` ORDER BY `id` DESC";
         if (!$result = $db->query($sql)) {
             echo "Query failed: ".$db->error;
         }

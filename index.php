@@ -1,5 +1,7 @@
 <?php
 
+require_once("mysql.php");
+
 // Path for storing the images, must exist
 $folderPath = "img/";
 
@@ -8,7 +10,7 @@ if (!empty($_FILES)) {
     $file = $_FILES["file"];
     
     if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-        die("Error");
+        die("Error: Uploaded file doesn't exist");
     }
     
     if (!isset($file["error"]) || is_array($file["error"])) {
@@ -16,7 +18,7 @@ if (!empty($_FILES)) {
     }
     
     if ($file["error"] != UPLOAD_ERR_OK) {
-        die("Error");
+        die("Error: {$file['error']}");
     }
     
     // Allow only image files
@@ -42,7 +44,7 @@ if (!empty($_FILES)) {
         $i++;
     }
     
-    $db = new mysqli("localhost", "www", "www", "www");
+    $db = new mysqli($MYSQL_HOST, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DB);
     if ($db->connect_errno > 0) {
         die("Unable to connect to database: ".$db->connect_error);
     }
@@ -53,7 +55,7 @@ if (!empty($_FILES)) {
     // Generate codes using md5 hash, base64 used for mixed case alphabet
     $md5 = md5($name);
     $code = substr(base64_encode($md5), 0, 4);
-    $statement = $db->prepare("SELECT `id` FROM `sharex` WHERE `code` = ?
+    $statement = $db->prepare("SELECT `id` FROM `data` WHERE `code` = ?
                                LIMIT 1") or die("prepare()");
                                
     $statement->bind_param("s", $code) or die("bind_param()");
@@ -74,9 +76,10 @@ if (!empty($_FILES)) {
     
     $statement->close();
     
-    $sql = "INSERT INTO sharex(code, fname, time, ip) VALUES(?, ?, ?, ?)";
+    $sql = "INSERT INTO data(code, fname, time, ip) VALUES(?, ?, ?, ?)";
+    $currentTime = time();
     $statement = $db->prepare($sql) or die("prepare()");
-    $statement->bind_param("ssis", $code, $name, time(),
+    $statement->bind_param("ssis", $code, $name, $currentTime,
                            $_SERVER["REMOTE_ADDR"]) or die("bind_param()");
     $statement->execute() or die("execute() 3: ".$db->error);
     $statement->close();
@@ -84,14 +87,14 @@ if (!empty($_FILES)) {
     $db->close();
     
     move_uploaded_file($file["tmp_name"], $folderPath . $name);
-                    
+
     // Redirect to upload url
-    header("Location: http://i.miemala.com/".$code);
+    header("Location: https://i.miemala.com/".$code);
 }
 else if (isset($_GET["i"]) and !empty($_GET["i"])) {
     // -- Image displaying --
     
-    $db = new mysqli("localhost", "www", "www", "www");
+    $db = new mysqli($MYSQL_HOST, $MYSQL_USER, $MYSQL_PASS, $MYSQL_DB);
     if ($db->connect_errno > 0) {
         die("Unable to connect to database: ".$db->connect_error);
     }
@@ -102,7 +105,7 @@ else if (isset($_GET["i"]) and !empty($_GET["i"])) {
     if ($_GET["i"] === "random") {
         // Display random image
         
-        $sql = "SELECT `fname` FROM `sharex` ORDER BY RAND() LIMIT 1";
+        $sql = "SELECT `fname` FROM `data` ORDER BY RAND() LIMIT 1";
         if (!$result = $db->query($sql)) {
             die("Query failed: ".$db->error);
         }
@@ -120,9 +123,9 @@ else if (isset($_GET["i"]) and !empty($_GET["i"])) {
     else {
         // Get image from the database
         
-        $sql = "SELECT `fname` FROM `sharex` WHERE `code` = ? LIMIT 1";
+        $sql = "SELECT `fname` FROM `data` WHERE `code` = ? LIMIT 1";
         $statement = $db->prepare($sql) or die("prepare()");
-        $statement->bind_param("s", $_GET["i"]) or die("bind_param()");
+        $statement->bind_param("s", $_GET['i']) or die("bind_param()");
         $statement->execute() or die("execute()");
         $statement->store_result();
         $statement->bind_result($result) or die("bind_result()");
@@ -167,7 +170,8 @@ else {
 <html>
     <head>
         <meta charset="UTF-8">
-        <!--<link rel="icon" href="favicon.png">-->  <!--196x196x-->
+        <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="tabs.js"></script>
         <title>HQ Image Service</title>
@@ -175,8 +179,8 @@ else {
     <body>
         <div id="wrapper">
             <h1>HQ Image Service</h1>
-            <a href="/images">
-                <img id="ale" src="black-ale.png" alt="Beer">
+            <a href="/images/">
+                <img id="logo" src="high-quality.png" alt="HQ">
             </a>
             <div id="tabHeader">
                 <a href="#upload" class="tabLink active" onclick="changeTab(event, 'uploadTab')">
@@ -203,7 +207,7 @@ else {
   "Name": "i.miemala.com",
   "DestinationType": "None",
   "RequestType": "POST",
-  "RequestURL": "http://i.miemala.com",
+  "RequestURL": "https://i.miemala.com",
   "FileFormName": "file",
   "ResponseType": "RedirectionURL"
 }
